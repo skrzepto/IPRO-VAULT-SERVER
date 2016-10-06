@@ -1,0 +1,9 @@
+{
+    "serial_number": 1,
+    "name": "RPI 3",
+    "location": "IIT Tower Vault 1 SW Corner",
+    "temperature": 20.1,
+    "pressure": 760.2,
+    "humidity": 80.2,
+    "water_level": 2
+}
