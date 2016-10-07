@@ -12,7 +12,11 @@ func hello(rw http.ResponseWriter, req *http.Request) {
 }
 
 func main() {
+    i := handlers.Impl{}
+    i.InitDB()
+    i.InitSchema()
+
     http.HandleFunc("/", hello)
-    http.HandleFunc("/api/sensor_data", handlers.InsertNewSensorData)
+    http.HandleFunc("/api/sensor_data", i.InsertNewSensorData)
     log.Fatal(http.ListenAndServe(":8082", nil))
 }

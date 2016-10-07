@@ -4,12 +4,31 @@ import (
     "net/http"
     "encoding/json"
     "fmt"
-    // "log"
+    "log"
     "github.com/skrzepto/IPRO-VAULT-SERVER/models"
+    _ "github.com/jinzhu/gorm/dialects/sqlite"
+    "github.com/jinzhu/gorm"
 )
 
+type Impl struct {
+    DB *gorm.DB
+}
+
+func (i *Impl) InitDB() {
+    var err error
+    i.DB, err = gorm.Open("sqlite3", "ipro-vault.db")
+    if err != nil {
+        log.Fatalf("Got error when connect database, the error is '%v'", err)
+    }
+    i.DB.LogMode(true)
+}
+
+func (i *Impl) InitSchema() {
+    i.DB.AutoMigrate(&models.SensorData{})
+}
+
 // POST /api/sensor_data
-func InsertNewSensorData(rw http.ResponseWriter, req *http.Request) {
+func (i *Impl) InsertNewSensorData(rw http.ResponseWriter, req *http.Request) {
     if req.Method == "POST" {
         decoder := json.NewDecoder(req.Body)
         var t models.SensorData
@@ -19,5 +38,6 @@ func InsertNewSensorData(rw http.ResponseWriter, req *http.Request) {
             //log.Fatal(err)
         }
         fmt.Printf("decoded to %#v\n", t)
+        i.DB.Create(&t)
     }
 }
