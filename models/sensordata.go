@@ -14,8 +14,4 @@ type SensorData struct {
     Water_Level         float64     `json:"water_level"`
     CreatedAt           time.Time   `json:"createdAt"`
     UpdatedAt           time.Time   `json:"updatedAt"`
-    DeletedAt           time.Time   `json:"-"`
 }
-
-
-

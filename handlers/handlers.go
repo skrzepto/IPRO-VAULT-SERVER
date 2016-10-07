@@ -39,5 +39,16 @@ func (i *Impl) InsertNewSensorData(rw http.ResponseWriter, req *http.Request) {
         }
         fmt.Printf("decoded to %#v\n", t)
         i.DB.Create(&t)
+    } else if req.Method == "GET" {
+      var sensor_data []models.SensorData
+      sd := i.DB.Find(&sensor_data)
+      js, err := json.Marshal(sd)
+      
+      if err != nil {
+        http.Error(rw, err.Error(), http.StatusInternalServerError)
+        panic(err)
+      }
+      rw.Header().Set("Content-Type", "application/json")
+      rw.Write(js)
     }
 }
