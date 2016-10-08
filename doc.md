@@ -15,10 +15,10 @@ range for safe conditions, location of the node, etc…)
 Display the current state of all nodes with their sensor values, timestamp,
 and current status (green, red)
 
- ### GET /api/sensor_data/:sensor_id
+### GET /api/sensor_data/:sensor_id
 Display the sensor data for a specific ResponseWriter
 
- ### POST /api/sensor_data/:sensor_id
+### POST /api/sensor_data/:sensor_id
 Send data from rpi of its current sensor values
 
 ### GET /api/faults
