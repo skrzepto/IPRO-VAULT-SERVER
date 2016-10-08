@@ -50,13 +50,13 @@ func (i *Impl) POST_SensorData_ID(rw http.ResponseWriter, req *http.Request, ps 
 func (i *Impl) GET_SensorData_ID(rw http.ResponseWriter, req *http.Request, ps httprouter.Params) {
 	sensor_id := ps.ByName("sensor_id")
 	i.mu.Lock()
-	sd, exist:= i.sd_table[sensor_id]
+	sd, exist := i.sd_table[sensor_id]
 	i.mu.Unlock()
-  if !exist {
-    rw.WriteHeader(404)
-    rw.Write([]byte("Can't find sendor data for the id specified"))
-    return
-  }
+	if !exist {
+		rw.WriteHeader(404)
+		rw.Write([]byte("Can't find sendor data for the id specified"))
+		return
+	}
 	js, err := json.Marshal(sd)
 	if err != nil {
 		http.Error(rw, err.Error(), http.StatusInternalServerError)
