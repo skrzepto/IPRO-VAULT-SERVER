@@ -1,22 +1,26 @@
 package main
 
 import (
-    "net/http"
-    "io"
-    "log"
-    "github.com/skrzepto/IPRO-VAULT-SERVER/handlers"
+	"github.com/julienschmidt/httprouter"
+	"github.com/skrzepto/IPRO-VAULT-SERVER/handlers"
+	"io"
+	"log"
+	"net/http"
 )
 
-func hello(rw http.ResponseWriter, req *http.Request) {
-    io.WriteString(rw, "Hello world!")
+func hello(rw http.ResponseWriter, req *http.Request, _ httprouter.Params) {
+	io.WriteString(rw, "Hello world!")
 }
 
 func main() {
-    i := handlers.Impl{}
-    i.InitDB()
-    i.InitSchema()
+	i := handlers.InitGlobal()
+	router := httprouter.New()
 
-    http.HandleFunc("/", hello)
-    http.HandleFunc("/api/sensor_data", i.InsertNewSensorData)
-    log.Fatal(http.ListenAndServe(":8082", nil))
+	router.GET("/", hello)
+	router.GET("/api/sensor_data", i.SensorData)
+	router.POST("/api/sensor_data", i.SensorData)
+	router.GET("/api/sensor_data/:sensor_id", i.GET_SensorData_ID)
+	router.POST("/api/sensor_data/:sensor_id", i.POST_SensorData_ID)
+
+	log.Fatal(http.ListenAndServe(":8082", router))
 }
