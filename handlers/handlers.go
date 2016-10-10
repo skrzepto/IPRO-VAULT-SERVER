@@ -153,6 +153,7 @@ func (i *Impl) DELETE_Faults_ID(rw http.ResponseWriter, req *http.Request, ps ht
 		return
 	}
 	js, err := json.Marshal(flts)
+	delete(i.faults, sensor_id)
 	i.mu.Unlock()
 
 	if err != nil {
