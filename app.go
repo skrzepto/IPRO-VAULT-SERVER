@@ -2,7 +2,6 @@ package main
 
 import (
 	"github.com/julienschmidt/httprouter"
-	"github.com/skrzepto/IPRO-VAULT-SERVER/handlers"
 	"io"
 	"log"
 	"net/http"
@@ -13,7 +12,7 @@ func hello(rw http.ResponseWriter, req *http.Request, _ httprouter.Params) {
 }
 
 func main() {
-	i := handlers.InitGlobal()
+	i := InitGlobal()
 	router := httprouter.New()
 
 	router.GET("/", hello)
