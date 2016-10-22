@@ -129,7 +129,14 @@ func (i *Impl) GET_SensorData(rw http.ResponseWriter, req *http.Request, _ httpr
 func (i *Impl) GET_Faults_ID(rw http.ResponseWriter, req *http.Request, ps httprouter.Params) {
 	sensor_id := ps.ByName("sensor_id")
 	i.mu.Lock()
-	js, err := json.Marshal(i.faults[sensor_id][len(i.faults[sensor_id])-1])
+	fault, ok := i.faults[sensor_id]
+	if !ok {
+		rw.WriteHeader(404)
+		rw.Write([]byte("Can't find fault data for the id specified"))
+		i.mu.Unlock()
+		return
+	}
+	js, err := json.Marshal(fault[len(fault)-1])
 	i.mu.Unlock()
 	if err != nil {
 		http.Error(rw, err.Error(), http.StatusInternalServerError)

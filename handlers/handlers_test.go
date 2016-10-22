@@ -229,3 +229,103 @@ func Test_POST_Sensor_Data(t *testing.T) {
 		t.Errorf("fault dataentry and sd_table should be equal, dataentry: %v  sd_table %v", *i.faults["1"][0].DataEntry, i.sd_table["1"])
 	}
 }
+
+func Test_GET_DELETE_Faults_ID(t *testing.T) {
+	i := InitGlobal()
+	utc, err := time.LoadLocation("UTC")
+	if err != nil {
+		t.Fatalf("Could not create time location: %v", err)
+	}
+	dt := time.Date(2016, 12, 20, 10, 28, 50, 0, utc) //year int, month Month, day, hour, min, sec, nsec int, loc *Location
+
+	sd1 := SensorData{Location: "IIT Tower Vault 1 SW Corner", Serial_Number: 1,
+		Temperature: 120.1, Pressure: 760.2, Humidity: 80.2,
+		Date_Time: dt, Water_Level: 20}
+	i.sd_table["1"] = sd1
+	fe := FaultEntry{&sd1, []string{"Temperature exceeded threshold!"}}
+	i.faults["1"] = append(i.faults["1"], &fe)
+
+	req, err := http.NewRequest(
+		http.MethodGet,
+		"http://localhost:8082/api/faults/1",
+		nil,
+	)
+
+	if err != nil {
+		t.Fatalf("Could not create request: %v", err)
+	}
+
+	rec := httptest.NewRecorder()
+	ps := httprouter.Params{httprouter.Param{"sensor_id", "1"}}
+	i.GET_Faults_ID(rec, req, ps)
+
+	if rec.Code != http.StatusOK {
+		t.Errorf("expected status 200 got %d", rec.Code)
+	}
+	expected := "{\"DataEntry\":{\"location\":\"IIT Tower Vault 1 SW Corner\",\"serial_number\":1,\"temperature\":120.1,\"pressure\":760.2,\"humidity\":80.2,\"datetime\":\"2016-12-20T10:28:50Z\",\"water_level\":20},\"FaultMessages\":[\"Temperature exceeded threshold!\"]}"
+	if expected != rec.Body.String() {
+		t.Errorf("expected string not equal to response body, got %s", rec.Body.String())
+	}
+
+	//Delete the faults for sensor id 1
+	req, err = http.NewRequest(
+		http.MethodDelete,
+		"http://localhost:8082/api/faults/1",
+		nil,
+	)
+
+	if err != nil {
+		t.Fatalf("Could not create request: %v", err)
+	}
+
+	rec = httptest.NewRecorder()
+	ps = httprouter.Params{httprouter.Param{"sensor_id", "1"}}
+	i.DELETE_Faults_ID(rec, req, ps)
+
+	if rec.Code != http.StatusOK {
+		t.Errorf("expected status 200 got %d", rec.Code)
+	}
+
+	//Delete the faults for sensor id 999 which doesnt exist
+	req, err = http.NewRequest(
+		http.MethodDelete,
+		"http://localhost:8082/api/faults/999",
+		nil,
+	)
+
+	if err != nil {
+		t.Fatalf("Could not create request: %v", err)
+	}
+
+	rec = httptest.NewRecorder()
+	ps = httprouter.Params{httprouter.Param{"sensor_id", "999"}}
+	i.DELETE_Faults_ID(rec, req, ps)
+
+	if rec.Code != http.StatusNotFound {
+		t.Errorf("expected status 404 got %d", rec.Code)
+	}
+
+	//Try to get faults for sensor id 1 which was just deleted
+	req, err = http.NewRequest(
+		http.MethodGet,
+		"http://localhost:8082/api/faults/1",
+		nil,
+	)
+
+	if err != nil {
+		t.Fatalf("Could not create request: %v", err)
+	}
+
+	rec = httptest.NewRecorder()
+	ps = httprouter.Params{httprouter.Param{"sensor_id", "1"}}
+	i.GET_Faults_ID(rec, req, ps)
+
+	if rec.Code != http.StatusNotFound {
+		t.Errorf("expected status 404 got %d", rec.Code)
+	}
+
+	expected = "Can't find fault data for the id specified"
+	if expected != rec.Body.String() {
+		t.Errorf("expected string not equal to response body, got %s", rec.Body.String())
+	}
+}
