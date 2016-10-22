@@ -83,5 +83,16 @@ After checking out the node and conditions are good. The user must remove the no
 
 -----
 
+## JSON data example
 
-`
+```
+{
+    "serial_number": 1,
+    "location": "IIT Tower Vault 1 SW Corner",
+    "temperature": 20.1,
+    "pressure": 760.2,
+    "humidity": 80.2,
+    "water_level": 2
+}
+
+```

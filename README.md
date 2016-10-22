@@ -18,7 +18,7 @@ go get -u github.com/skrzepto/IPRO-VAULT-SERVER
 go run $GOPATH/src/github.com/skrzepto/IPRO-VAULT-SERVER/app.go
 ``
 
-## Installing the program
+## Creating a binary
 
 ```
 cd $GOPATH/src/github.com/skrzepto/IPRO-VAULT-SERVER/
@@ -27,3 +27,9 @@ IPRO-VAULT-SERVER
 ```
 
 now go to localhost:8082
+
+## Running test suite
+``
+cd $GOPATH/src/github.com/skrzepto/IPRO-VAULT-SERVER/
+go test
+``
