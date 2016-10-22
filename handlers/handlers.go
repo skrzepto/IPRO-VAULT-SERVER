@@ -10,15 +10,13 @@ import (
 )
 
 type SensorData struct {
-	Name          string    `json:"name"`
 	Location      string    `json:"location"`
 	Serial_Number int       `json:"serial_number"`
 	Temperature   float64   `json:"temperature"`
 	Pressure      float64   `json:"pressure"`
 	Humidity      float64   `json:"humidity"`
+	Date_Time			time.Time	`json:"datetime"`
 	Water_Level   float64   `json:"water_level"`
-	CreatedAt     time.Time `json:"createdAt"`
-	UpdatedAt     time.Time `json:"updatedAt"`
 }
 
 type MetricLimits struct {
@@ -128,9 +126,10 @@ func (i *Impl) GET_SensorData(rw http.ResponseWriter, req *http.Request, _ httpr
 	rw.Write(js)
 }
 
-func (i *Impl) GET_Faults(rw http.ResponseWriter, req *http.Request, _ httprouter.Params) {
+func (i *Impl) GET_Faults_ID(rw http.ResponseWriter, req *http.Request, ps httprouter.Params) {
+	sensor_id := ps.ByName("sensor_id")
 	i.mu.Lock()
-	js, err := json.Marshal(i.faults)
+	js, err := json.Marshal(i.faults[sensor_id][len(i.faults[sensor_id])-1])
 	i.mu.Unlock()
 	if err != nil {
 		http.Error(rw, err.Error(), http.StatusInternalServerError)
