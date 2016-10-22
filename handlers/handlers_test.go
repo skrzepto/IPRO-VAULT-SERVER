@@ -80,6 +80,116 @@ func Test_GET_Sensor_Data_Empty(t *testing.T) {
 	}
 }
 
+func Test_GET_Sensor_Data(t *testing.T) {
+	i := InitGlobal()
+	utc, err := time.LoadLocation("UTC")
+	if err != nil {
+		t.Fatalf("Could not create time location: %v", err)
+	}
+	dt := time.Date(2016, 12, 20, 10, 28, 50, 0, utc) //year int, month Month, day, hour, min, sec, nsec int, loc *Location
+
+	sd1 := SensorData{Location: "IIT Tower Vault 1 SW Corner", Serial_Number: 1,
+		Temperature: 120.1, Pressure: 760.2, Humidity: 80.2,
+		Date_Time: dt, Water_Level: 20}
+	i.sd_table["1"] = sd1
+
+	sd2 := SensorData{Location: "IIT Tower Vault 2 NW Corner", Serial_Number: 2,
+		Temperature: 40.1, Pressure: 760.2, Humidity: 40.2,
+		Date_Time: dt, Water_Level: 2}
+	i.sd_table["2"] = sd2
+
+	req, err := http.NewRequest(
+		http.MethodGet,
+		"http://localhost:8082/api/sensor_data",
+		nil,
+	)
+
+	if err != nil {
+		t.Fatalf("Could not create request: %v", err)
+	}
+
+	rec := httptest.NewRecorder()
+	i.GET_SensorData(rec, req, nil)
+
+	if rec.Code != http.StatusOK {
+		t.Errorf("expected status 200 got %d", rec.Code)
+	}
+	if rec.Header()["Content-Type"][0] != "application/json" {
+		t.Errorf("expected header of application/json but got %v", rec.Header()["Content-Type"])
+	}
+	expected := "{\"1\":{\"location\":\"IIT Tower Vault 1 SW Corner\",\"serial_number\":1,\"temperature\":120.1,\"pressure\":760.2,\"humidity\":80.2,\"datetime\":\"2016-12-20T10:28:50Z\",\"water_level\":20},\"2\":{\"location\":\"IIT Tower Vault 2 NW Corner\",\"serial_number\":2,\"temperature\":40.1,\"pressure\":760.2,\"humidity\":40.2,\"datetime\":\"2016-12-20T10:28:50Z\",\"water_level\":2}}"
+	if rec.Body.String() != expected {
+		t.Errorf("expected empty json body but got %v", rec.Body)
+	}
+	req, err = http.NewRequest(
+		http.MethodGet,
+		"http://localhost:8082/api/sensor_data",
+		nil,
+	)
+
+	if err != nil {
+		t.Fatalf("Could not create request: %v", err)
+	}
+
+	rec = httptest.NewRecorder()
+	i.GET_SensorData(rec, req, nil)
+
+	if rec.Code != http.StatusOK {
+		t.Errorf("expected status 200 got %d", rec.Code)
+	}
+	if rec.Header()["Content-Type"][0] != "application/json" {
+		t.Errorf("expected header of application/json but got %v", rec.Header()["Content-Type"])
+	}
+	expected = "{\"1\":{\"location\":\"IIT Tower Vault 1 SW Corner\",\"serial_number\":1,\"temperature\":120.1,\"pressure\":760.2,\"humidity\":80.2,\"datetime\":\"2016-12-20T10:28:50Z\",\"water_level\":20},\"2\":{\"location\":\"IIT Tower Vault 2 NW Corner\",\"serial_number\":2,\"temperature\":40.1,\"pressure\":760.2,\"humidity\":40.2,\"datetime\":\"2016-12-20T10:28:50Z\",\"water_level\":2}}"
+	if rec.Body.String() != expected {
+		t.Errorf("expected empty json body but got %v", rec.Body)
+	}
+
+	req, err = http.NewRequest(
+		http.MethodGet,
+		"http://localhost:8082/api/sensor_data/999",
+		nil,
+	)
+
+	if err != nil {
+		t.Fatalf("Could not create request: %v", err)
+	}
+
+	rec = httptest.NewRecorder()
+	ps := httprouter.Params{httprouter.Param{"sensor_id", "999"}}
+	i.GET_SensorData_ID(rec, req, ps)
+
+	if rec.Code != http.StatusNotFound {
+		t.Errorf("expected status 404 got %d", rec.Code)
+	}
+
+	req, err = http.NewRequest(
+		http.MethodGet,
+		"http://localhost:8082/api/sensor_data/1",
+		nil,
+	)
+
+	if err != nil {
+		t.Fatalf("Could not create request: %v", err)
+	}
+
+	rec = httptest.NewRecorder()
+	ps = httprouter.Params{httprouter.Param{"sensor_id", "1"}}
+	i.GET_SensorData_ID(rec, req, ps)
+
+	if rec.Code != http.StatusOK {
+		t.Errorf("expected status 200 got %d", rec.Code)
+	}
+
+	if rec.Header()["Content-Type"][0] != "application/json" {
+		t.Errorf("expected header of application/json but got %v", rec.Header()["Content-Type"])
+	}
+	expected = "{\"location\":\"IIT Tower Vault 1 SW Corner\",\"serial_number\":1,\"temperature\":120.1,\"pressure\":760.2,\"humidity\":80.2,\"datetime\":\"2016-12-20T10:28:50Z\",\"water_level\":20}"
+	if rec.Body.String() != expected {
+		t.Errorf("expected sd1 json body but got %v", rec.Body)
+	}
+}
+
 func Test_POST_Sensor_Data(t *testing.T) {
 	i := InitGlobal()
 	payload := []byte(`{
