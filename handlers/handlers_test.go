@@ -49,9 +49,9 @@ func Test_checkForFaults_Nil(t *testing.T) {
 	ml := MetricLimits{100.0, -20.0, 0.7, 0.0, 160, 10}
 
 	f := checkForFaults(sd, ml)
-  if f != nil {
-    t.Fatalf("All sensor data were within range, still returned exceeds threshold: %v", err)
-  }
+	if f != nil {
+		t.Fatalf("All sensor data were within range, still returned exceeds threshold: %v", err)
+	}
 }
 
 func Test_GET_Sensor_Data_Empty(t *testing.T) {
