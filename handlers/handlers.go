@@ -147,6 +147,30 @@ func (i *Impl) GET_Faults_ID(rw http.ResponseWriter, req *http.Request, ps httpr
 	rw.Write(js)
 }
 
+func (i *Impl) getLatestFaults() map[string]*FaultEntry {
+	res := make(map[string]*FaultEntry)
+	i.mu.Lock()
+	if len(i.faults) > 0 {
+		for key, val := range i.faults {
+			res[key] = val[len(val)-1]
+		}
+	}
+	i.mu.Unlock()
+	return res
+}
+
+func (i *Impl) GET_Faults(rw http.ResponseWriter, req *http.Request, _ httprouter.Params) {
+	js, err := json.Marshal(i.getLatestFaults())
+
+	if err != nil {
+		http.Error(rw, err.Error(), http.StatusInternalServerError)
+		panic(err)
+	}
+
+	rw.Header().Set("Content-Type", "application/json")
+	rw.Write(js)
+}
+
 func (i *Impl) DELETE_Faults_ID(rw http.ResponseWriter, req *http.Request, ps httprouter.Params) {
 	sensor_id := ps.ByName("sensor_id")
 

@@ -329,3 +329,60 @@ func Test_GET_DELETE_Faults_ID(t *testing.T) {
 		t.Errorf("expected string not equal to response body, got %s", rec.Body.String())
 	}
 }
+
+func Test_GET_Faults(t *testing.T) {
+	i := InitGlobal()
+	utc, err := time.LoadLocation("UTC")
+	if err != nil {
+		t.Fatalf("Could not create time location: %v", err)
+	}
+	dt := time.Date(2016, 12, 20, 10, 28, 50, 0, utc) //year int, month Month, day, hour, min, sec, nsec int, loc *Location
+
+	sd1 := SensorData{Location: "IIT Tower Vault 1 SW Corner", Serial_Number: 1,
+		Temperature: 120.1, Pressure: 760.2, Humidity: 80.2,
+		Date_Time: dt, Water_Level: 20}
+	i.sd_table["1"] = sd1
+
+	fe := FaultEntry{&sd1, []string{"Temperature exceeded threshold!"}}
+	i.faults["1"] = append(i.faults["1"], &fe)
+
+	sd2 := SensorData{Location: "IIT Tower Vault 2 NW Corner", Serial_Number: 2,
+		Temperature: 40.1, Pressure: 760.2, Humidity: 40.2,
+		Date_Time: dt, Water_Level: 2}
+	i.sd_table["2"] = sd2
+
+	fe2 := FaultEntry{&sd2, []string{"Temperature exceeded threshold!"}}
+	i.faults["2"] = append(i.faults["2"], &fe2)
+
+	sd3 := SensorData{Location: "NEW - IIT Tower Vault 1 NW Corner", Serial_Number: 2,
+		Temperature: 140.1, Pressure: 160.2, Humidity: 140.2,
+		Date_Time: dt, Water_Level: 12}
+	i.sd_table["2"] = sd2
+
+	fe3 := FaultEntry{&sd3, []string{"Temperature exceeded threshold!"}}
+	i.faults["2"] = append(i.faults["2"], &fe3)
+
+	req, err := http.NewRequest(
+		http.MethodGet,
+		"http://localhost:8082/api/faults",
+		nil,
+	)
+
+	if err != nil {
+		t.Fatalf("Could not create request: %v", err)
+	}
+
+	rec := httptest.NewRecorder()
+	i.GET_Faults(rec, req, nil)
+
+	if rec.Code != http.StatusOK {
+		t.Errorf("expected status 200 got %d", rec.Code)
+	}
+	if rec.Header()["Content-Type"][0] != "application/json" {
+		t.Errorf("expected header of application/json but got %v", rec.Header()["Content-Type"])
+	}
+	expected := "{\"1\":{\"DataEntry\":{\"location\":\"IIT Tower Vault 1 SW Corner\",\"serial_number\":1,\"temperature\":120.1,\"pressure\":760.2,\"humidity\":80.2,\"datetime\":\"2016-12-20T10:28:50Z\",\"water_level\":20},\"FaultMessages\":[\"Temperature exceeded threshold!\"]},\"2\":{\"DataEntry\":{\"location\":\"NEW - IIT Tower Vault 1 NW Corner\",\"serial_number\":2,\"temperature\":140.1,\"pressure\":160.2,\"humidity\":140.2,\"datetime\":\"2016-12-20T10:28:50Z\",\"water_level\":12},\"FaultMessages\":[\"Temperature exceeded threshold!\"]}}"
+	if rec.Body.String() != expected {
+		t.Errorf("expected string not equat to json body: %v", rec.Body)
+	}
+}
