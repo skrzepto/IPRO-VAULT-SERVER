@@ -1,4 +1,4 @@
-package handlers
+package main
 
 import (
 	"encoding/json"
@@ -10,15 +10,13 @@ import (
 )
 
 type SensorData struct {
-	Name          string    `json:"name"`
 	Location      string    `json:"location"`
 	Serial_Number int       `json:"serial_number"`
 	Temperature   float64   `json:"temperature"`
 	Pressure      float64   `json:"pressure"`
 	Humidity      float64   `json:"humidity"`
+	Date_Time     time.Time `json:"datetime"`
 	Water_Level   float64   `json:"water_level"`
-	CreatedAt     time.Time `json:"createdAt"`
-	UpdatedAt     time.Time `json:"updatedAt"`
 }
 
 type MetricLimits struct {
@@ -128,10 +126,42 @@ func (i *Impl) GET_SensorData(rw http.ResponseWriter, req *http.Request, _ httpr
 	rw.Write(js)
 }
 
-func (i *Impl) GET_Faults(rw http.ResponseWriter, req *http.Request, _ httprouter.Params) {
+func (i *Impl) GET_Faults_ID(rw http.ResponseWriter, req *http.Request, ps httprouter.Params) {
+	sensor_id := ps.ByName("sensor_id")
 	i.mu.Lock()
-	js, err := json.Marshal(i.faults)
+	fault, ok := i.faults[sensor_id]
+	if !ok {
+		rw.WriteHeader(404)
+		rw.Write([]byte("Can't find fault data for the id specified"))
+		i.mu.Unlock()
+		return
+	}
+	js, err := json.Marshal(fault[len(fault)-1])
 	i.mu.Unlock()
+	if err != nil {
+		http.Error(rw, err.Error(), http.StatusInternalServerError)
+		panic(err)
+	}
+
+	rw.Header().Set("Content-Type", "application/json")
+	rw.Write(js)
+}
+
+func (i *Impl) getLatestFaults() map[string]*FaultEntry {
+	res := make(map[string]*FaultEntry)
+	i.mu.Lock()
+	if len(i.faults) > 0 {
+		for key, val := range i.faults {
+			res[key] = val[len(val)-1]
+		}
+	}
+	i.mu.Unlock()
+	return res
+}
+
+func (i *Impl) GET_Faults(rw http.ResponseWriter, req *http.Request, _ httprouter.Params) {
+	js, err := json.Marshal(i.getLatestFaults())
+
 	if err != nil {
 		http.Error(rw, err.Error(), http.StatusInternalServerError)
 		panic(err)
