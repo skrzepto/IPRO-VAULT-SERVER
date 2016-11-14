@@ -22,9 +22,8 @@
     <td>Far left corner of Vault 1</td>
   </tr>
   {{ range $key, $value := . }}
-    <a href="/{{ $value.Serial_Number }}">
     <tr>
-      <td>  </td>
+      <td><a href="/node/{{ $value.Serial_Number }}"> View </a></td>
       <td> {{ $value.Serial_Number }} </td>
       <td> {{ $value.Date_Time }} </td>
       <td> {{ $value.Temperature }} </td>
@@ -33,7 +32,6 @@
       <td> {{ $value.Pressure }} </td>
       <td> {{ $value.Location }} </td>
     </tr>
-  </a>
   {{ end }}
   </table>
 </html>

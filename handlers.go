@@ -102,6 +102,46 @@ func (i *Impl) Index(rw http.ResponseWriter, req *http.Request, ps httprouter.Pa
 	}
 }
 
+type nodedata struct {
+    SD SensorData
+		Faults	[]*FaultEntry
+		IsFaulting bool
+}
+
+func (i *Impl) NodeStatus(rw http.ResponseWriter, req *http.Request, ps httprouter.Params) {
+	sensor_id := ps.ByName("sensor_id")
+	var data nodedata
+	i.mu.Lock()
+	if _, ok := i.sd_table[sensor_id]; ok {
+    data.SD = i.sd_table[sensor_id]
+	} else {
+		i.mu.Unlock()
+		rw.WriteHeader(404)
+		rw.Write([]byte("Can't find sendor data for the id specified"))
+		return
+	}
+	i.mu.Unlock()
+
+	if _, ok := i.faults[sensor_id]; ok {
+    data.Faults = i.faults[sensor_id]
+		data.IsFaulting = true
+	} else {
+		data.IsFaulting = false
+	}
+
+	//fmt.Printf("decoded to %#v\n", data)
+
+	fp := path.Join("templates", "rpi.html")
+	tmpl, err := template.ParseFiles(fp)
+	if err != nil {
+	    http.Error(rw, err.Error(), http.StatusInternalServerError)
+	    return
+	}
+	if err := tmpl.Execute(rw, data); err != nil {
+	    http.Error(rw, err.Error(), http.StatusInternalServerError)
+	}
+}
+
 
 
 /***

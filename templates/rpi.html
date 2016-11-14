@@ -1,0 +1,60 @@
+<html>
+  <h1>Raspberry Pi</h1>
+  <table border="1">
+    <tr>
+      <td> Status </td>
+      <td> {{if .IsFaulting }} Faulting {{end}} </td>
+    </tr>
+
+    <tr>
+      <td> Serial Number </td>
+      <td> {{ .SD.Serial_Number }}</td>
+    </tr>
+
+    <tr>
+      <td> Last Update </td>
+      <td> {{ .SD.Date_Time }}</td>
+    </tr>
+
+    <tr>
+      <td> Location </td>
+      <td> {{ .SD.Location }}</td>
+    </tr>
+
+  </table>
+  <br />
+  <h2> Current Conditions </h2>
+  <table border="1">
+  <tr>
+    <th>Temp (C)</th>
+    <th>Humidity (%)</th>
+    <th>Water lvl (inches)</th>
+    <th>Pressure (atm)</th>
+  </tr>
+      <td> {{ .SD.Temperature }} </td>
+      <td> {{ .SD.Humidity }} </td>
+      <td> {{ .SD.Water_Level }} </td>
+      <td> {{ .SD.Pressure }} </td>
+    </tr>
+  </table>
+  <br />
+  <h2> Faults </h2>
+  <table border="1">
+  <tr>
+    <th>DateTime</th>
+    <th>Reason</th>
+    <th>Data </th>
+  </tr>
+  {{ range $idx, $value := .Faults }}
+    <tr>
+      <td> {{ $value.DataEntry.Date_Time}} </td>
+      <td> {{ $value.FaultMessages}} </td>
+      <td> {{ $value.DataEntry }} </td>
+    </tr>
+  {{ end }}
+</table>
+<!-- Add button to clear the faults table -->
+<form action="/api/faults/{{ .SD.Serial_Number }}/delete" method="GET">
+    <input type="submit" value="Clear Faults">
+</form>
+</html>
