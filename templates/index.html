@@ -1,0 +1,39 @@
+<html>
+  <h1>IPRO-VAULT</h1>
+  <table border="1">
+  <tr>
+    <th>Status</th>
+    <th>Serial Number</th>
+    <th>Last Updated</th>
+    <th>Temp (C)</th>
+    <th>Humidity (%)</th>
+    <th>Water lvl (inches)</th>
+    <th>Pressure (atm)</th>
+    <th>Location</th>
+  </tr>
+  <tr>
+    <td>Example</td>
+    <td>112</td>
+    <td>Nov 12, 2016 8:40AM</td>
+    <td>22</td>
+    <td>45</td>
+    <td>1</td>
+    <td>.998</td>
+    <td>Far left corner of Vault 1</td>
+  </tr>
+  {{ range $key, $value := . }}
+    <a href="/{{ $value.Serial_Number }}">
+    <tr>
+      <td>  </td>
+      <td> {{ $value.Serial_Number }} </td>
+      <td> {{ $value.Date_Time }} </td>
+      <td> {{ $value.Temperature }} </td>
+      <td> {{ $value.Humidity }} </td>
+      <td> {{ $value.Water_Level }} </td>
+      <td> {{ $value.Pressure }} </td>
+      <td> {{ $value.Location }} </td>
+    </tr>
+  </a>
+  {{ end }}
+  </table>
+</html>

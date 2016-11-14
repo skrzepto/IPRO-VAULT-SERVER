@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"sync"
 	"time"
+	"html/template"
+	"path"
 )
 
 type SensorData struct {
@@ -74,6 +76,42 @@ func checkForFaults(sd SensorData, lim MetricLimits) *FaultEntry {
 	return &FaultEntry{&sd, msgs}
 }
 
+
+/***
+______               _     _____          _
+|  ___|             | |   |  ___|        | |
+| |_ _ __ ___  _ __ | |_  | |__ _ __   __| |
+|  _| '__/ _ \| '_ \| __| |  __| '_ \ / _` |
+| | | | | (_) | | | | |_  | |__| | | | (_| |
+\_| |_|  \___/|_| |_|\__| \____|_| |_|\__,_|
+***/
+func (i *Impl) Index(rw http.ResponseWriter, req *http.Request, ps httprouter.Params) {
+
+	i.mu.Lock()
+	data := i.sd_table
+	i.mu.Unlock()
+
+	fp := path.Join("templates", "index.html")
+	tmpl, err := template.ParseFiles(fp)
+	if err != nil {
+	    http.Error(rw, err.Error(), http.StatusInternalServerError)
+	    return
+	}
+	if err := tmpl.Execute(rw, data); err != nil {
+	    http.Error(rw, err.Error(), http.StatusInternalServerError)
+	}
+}
+
+
+
+/***
+______ _____ _____ _____    ___ ______ _____
+| ___ |  ___/  ___|_   _|  / _ \| ___ |_   _|
+| |_/ | |__ \ `--.  | |   / /_\ | |_/ / | |
+|    /|  __| `--. \ | |   |  _  |  __/  | |
+| |\ \| |___/\__/ / | |   | | | | |    _| |_
+\_| \_\____/\____/  \_/   \_| |_\_|    \___/
+***/
 func (i *Impl) POST_SensorData_ID(rw http.ResponseWriter, req *http.Request, ps httprouter.Params) {
 	var sd SensorData
 

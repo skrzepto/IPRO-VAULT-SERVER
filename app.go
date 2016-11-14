@@ -2,20 +2,15 @@ package main
 
 import (
 	"github.com/julienschmidt/httprouter"
-	"io"
 	"log"
 	"net/http"
 )
-
-func hello(rw http.ResponseWriter, req *http.Request, _ httprouter.Params) {
-	io.WriteString(rw, "Hello world!")
-}
 
 func main() {
 	i := InitGlobal()
 	router := httprouter.New()
 
-	router.GET("/", hello)
+	router.GET("/", i.Index)
 	router.GET("/api/sensor_data", i.GET_SensorData)
 	router.GET("/api/sensor_data/:sensor_id", i.GET_SensorData_ID)
 	router.POST("/api/sensor_data/:sensor_id", i.POST_SensorData_ID)
