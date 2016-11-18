@@ -46,7 +46,7 @@ func InitGlobal() *Impl {
 	var i Impl
 	i.sd_table = make(map[string]SensorData)
 	i.faults = make(map[string][]*FaultEntry)
-	i.limits = MetricLimits{30.0, 20.0, 20, 0.0, 10000, 10}
+	i.limits = MetricLimits{30.0, 20.0, 20, 0.0, 1.1, 10}
 	return &i
 }
 
@@ -164,7 +164,7 @@ func (i *Impl) POST_SensorData_ID(rw http.ResponseWriter, req *http.Request, ps 
 
 	faults := checkForFaults(sd, i.limits)
 	sensor_id := ps.ByName("sensor_id")
-
+    sd.Pressure = sd.Pressure/10000.0
 	i.mu.Lock()
 	i.sd_table[sensor_id] = sd
 	if faults != nil {
