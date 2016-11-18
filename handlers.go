@@ -161,10 +161,9 @@ func (i *Impl) POST_SensorData_ID(rw http.ResponseWriter, req *http.Request, ps 
 		panic(err)
 	}
 	fmt.Printf("decoded to %#v\n", sd)
-
+    sd.Pressure = sd.Pressure/100000.0
 	faults := checkForFaults(sd, i.limits)
 	sensor_id := ps.ByName("sensor_id")
-    sd.Pressure = sd.Pressure/100000.0
 	i.mu.Lock()
 	i.sd_table[sensor_id] = sd
 	if faults != nil {
