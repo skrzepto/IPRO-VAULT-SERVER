@@ -46,7 +46,7 @@ func InitGlobal() *Impl {
 	var i Impl
 	i.sd_table = make(map[string]SensorData)
 	i.faults = make(map[string][]*FaultEntry)
-	i.limits = MetricLimits{100.0, -20.0, 0.7, 0.0, 160, 10}
+	i.limits = MetricLimits{30.0, 20.0, 20, 0.0, 10000, 10}
 	return &i
 }
 

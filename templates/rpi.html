@@ -34,7 +34,7 @@
       <td> {{ .SD.Temperature }} </td>
       <td> {{ .SD.Humidity }} </td>
       <td> {{ .SD.Water_Level }} </td>
-      <td> {{ .SD.Pressure }} </td>
+      <td> {{ .SD.Pressure/10000.0 }} </td>
     </tr>
   </table>
   <br />
